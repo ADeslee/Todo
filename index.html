@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon FlowTask Personnel</title>
+    <style>
+        :root {
+            --bg: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --panel: rgba(255, 255, 255, 0.9);
+            --text: #2d3748;
+            --muted: #718096;
+            --accent: #ff4a5a;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: linear-gradient(135deg, #1a202c 0%, #0d1117 100%);
+                --panel: rgba(22, 27, 34, 0.95);
+                --text: #f0f6fc;
+                --muted: #8b949e;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0; background: var(--bg); color: var(--text);
+            display: flex; justify-content: center; align-items: center; min-height: 100vh;
+        }
+        .container {
+            width: 90%; max-width: 800px; background: var(--panel);
+            padding: 30px; border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        h1 { margin-top: 0; color: var(--accent); }
+        .form-box { display: flex; gap: 10px; margin-bottom: 20px; }
+        input { flex: 1; padding: 12px; border: 1px solid var(--muted); border-radius: 8px; background: transparent; color: var(--text); font-size: 16px; }
+        button { background: var(--accent); color: white; border: none; padding: 0 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .list { list-style: none; padding: 0; margin: 0; }
+        .item { display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid rgba(0,0,0,0.1); }
+        .item.done span { text-decoration: line-through; color: var(--muted); }
+        .del-btn { background: none; border: none; color: var(--accent); cursor: pointer; font-weight: bold; }
+        .checkbox { margin-right: 10px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚡️ FlowTask</h1>
+        <form class="form-box" id="f">
+            <input type="text" id="i" placeholder="Écrire une tâche..." required autocomplete="off">
+            <button type="submit">Ajouter</button>
+        </form>
+        <ul class="list" id="l"></ul>
+    </div>
+    <script>
+        let t = JSON.parse(localStorage.getItem('tasks_simple')) || [];
+        const f = document.getElementById('f'), i = document.getElementById('i'), l = document.getElementById('l');
+        
+        f.addEventListener('submit', (e) => {
+            e.preventDefault();
+            t.push({ id: Date.now(), text: i.value, done: false });
+            i.value = ''; save();
+        });
+        function save() {
+            localStorage.setItem('tasks_simple', JSON.stringify(t));
+            render();
+        }
+        function render() {
+            l.innerHTML = '';
+            t.forEach(task => {
+                const li = document.createElement('li');
+                li.className = `item ${task.done ? 'done' : ''}`;
+                li.innerHTML = `
+                    <div>
+                        <input type="checkbox" class="checkbox" ${task.done ? 'checked' : ''} onclick="toggle(${task.id})">
+                        <span>${task.text}</span>
+                    </div>
+                    <button class="del-btn" onclick="del(${task.id})">✕</button>
+                `;
+                l.appendChild(li);
+            });
+        }
+        function toggle(id) { t = t.map(x => x.id === id ? {...x, done: !x.done} : x); save(); }
+        function del(id) { t = t.filter(x => x.id !== id); save(); }
+        render();
+    </script>
+</body>
+</html>
